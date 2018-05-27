@@ -19,7 +19,17 @@ namespace Logger
             Error = 4,
 
             Fatal = 5
+        }
 
+        public enum LogOption
+        {
+            LogToFile,
+
+            LogToDatabase,
+
+            LogToEventViewer,
+
+            DuplicationFilter
         }
     }
 }

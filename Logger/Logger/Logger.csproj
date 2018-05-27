@@ -41,12 +41,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
-    <Compile Include="LogLevels\LogDebug.cs" />
-    <Compile Include="LogLevels\LogError.cs" />
-    <Compile Include="LogLevels\LogFatal.cs" />
-    <Compile Include="LogLevels\LogInformation.cs" />
+    <Compile Include="LogLevels\Debug.cs" />
+    <Compile Include="LogLevels\Error.cs" />
+    <Compile Include="LogLevels\Fatal.cs" />
+    <Compile Include="LogLevels\Information.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="LogLevels\Warning.cs" />
+    <Compile Include="LogMessage.cs" />
     <Compile Include="LogManager.cs" />
-    <Compile Include="LogLevels\LogWarning.cs" />
+    <Compile Include="LogOptions.cs" />
+    <Compile Include="LogTasks\LogEventViewerTask.cs" />
+    <Compile Include="LogTasks\LogDatabaseTask.cs" />
+    <Compile Include="LogTasks\LogFileTask.cs" />
+    <Compile Include="LogTasks\LogTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
