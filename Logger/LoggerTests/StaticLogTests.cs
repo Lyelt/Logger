@@ -14,11 +14,11 @@ namespace LoggerTests
     {
         private string LOG_DIR = "..\\log\\";
         private string APP_NAME = "TestAppName";
+
         [SetUp]
         public void LogTestSetup()
         {
-            LogOptions opts = new LogOptions(APP_NAME, LOG_DIR, LogLevel.Debug, LogOption.DuplicationFilter, LogOption.LogToFile);
-            LogManager.SetDefaults(opts);
+            
         }
 
         [Test]
@@ -36,16 +36,19 @@ namespace LoggerTests
             Log.Information("test info message");
         }
 
+        [Test]
         public void LogWarnTest()
         {
             Log.Warning("test warn message");
         }
 
+        [Test]
         public void LogErrorTest()
         {
             Log.Error("test error message");
         }
 
+        [Test]
         public void LogFatalTest()
         {
             Log.Fatal("test fatal message");

@@ -41,6 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
+    <Compile Include="LogOptions\LogEventViewerOptions.cs" />
+    <Compile Include="LogOptions\LogDatabaseOptions.cs" />
+    <Compile Include="LogOptions\LogFileOptions.cs" />
     <Compile Include="LogLevels\Debug.cs" />
     <Compile Include="LogLevels\Error.cs" />
     <Compile Include="LogLevels\Fatal.cs" />
@@ -49,11 +52,12 @@
     <Compile Include="LogLevels\Warning.cs" />
     <Compile Include="LogMessage.cs" />
     <Compile Include="LogManager.cs" />
-    <Compile Include="LogOptions.cs" />
-    <Compile Include="LogTasks\LogEventViewerTask.cs" />
-    <Compile Include="LogTasks\LogDatabaseTask.cs" />
-    <Compile Include="LogTasks\LogFileTask.cs" />
-    <Compile Include="LogTasks\LogTask.cs" />
+    <Compile Include="LogOptions\LogOptions.cs" />
+    <Compile Include="LogOptions\WriterOptions.cs" />
+    <Compile Include="LogTasks\LogEventViewerWriter.cs" />
+    <Compile Include="LogTasks\LogDatabaseWriter.cs" />
+    <Compile Include="LogTasks\LogFileWriter.cs" />
+    <Compile Include="LogTasks\LogWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

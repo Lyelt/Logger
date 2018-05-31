@@ -17,7 +17,7 @@ namespace Logger
         // Allow static logging to occur without ever providing options, by using the default options
         static LogManager()
         {
-            _defaults = new LogOptions();
+            _defaults = LogOptions.Default;
             _globalLogger = new Logger(typeof(LogManager), _defaults);
         }
 
@@ -37,15 +37,20 @@ namespace Logger
             return GetLogger<T>(_defaults);
         }
 
+        public static Logger GetLogger<T>(params LogOption[] options)
+        {
+            return GetLogger<T>(_defaults, options);
+        }
+
         /// <summary>
         /// Get a logger for the given type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Logger GetLogger<T>(LogOptions options)
+        public static Logger GetLogger<T>(LogOptions commonOptions, params LogOption[] options)
         {
-            return new Logger(typeof(T), options);
+            return new Logger(typeof(T), commonOptions, options);
         }
 
         internal static void LogDeferred(LogLevel level, Func<string> deferred)

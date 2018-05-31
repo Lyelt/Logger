@@ -11,66 +11,74 @@ namespace Logger
 {
     public partial class Logger
     {
-        private Type _type;
-        private LogOptions _options;
+        private LogOptions _commonOptions;
 
-        private List<LogTask> _logWriters;
+        private Type _type;
+        private Dictionary<string, LogWriter> _logWriters;
 
         private BlockingCollection<LogMessage> _logQueue;
         private CancellationTokenSource _cts;
 
-        public Logger(Type t, LogOptions options)
+        public Logger(Type t, LogOptions commonOptions, params LogOption[] options)
         {
+            _commonOptions = commonOptions;
             _type = t;
-            _options = options;
             _logQueue = new BlockingCollection<LogMessage>();
             _cts = new CancellationTokenSource();
-            RefreshLogOptions();
+            _logWriters = new Dictionary<string, LogWriter>();
+            SetLogWriters(options);
+        }
+
+        public void SetOptions(string writerName, WriterOptions options)
+        {
+
+        }
+
+        public void SetOptions(string writerName, LogOptions options)
+        {
+            if (_logWriters.ContainsKey(writerName))
+            {
+                _logWriters[writerName].SetCommonOptions(options);
+            }
         }
 
         public void SetOptions(LogOptions options)
         {
-            _options = options;
-            RefreshLogOptions();
+            foreach (var writer in _logWriters.Values)
+            {
+                writer.SetCommonOptions(options);
+            }
         }
 
-        public void AddLogTask(LogTask task)
+        public void AddLogWriter(LogWriter writer)
         {
-            _logWriters.Add(task);
+            _logWriters[writer.Name] = writer;
         }
 
-        private void RefreshLogOptions()
+        private void SetLogWriters(params LogOption[] options)
         {
-            _logWriters = new List<LogTask>();
+            if (options.Contains(LogOption.LogToDatabase))
+                AddLogWriter(new LogDatabaseWriter("DefaultDatabaseWriter"));
 
-            if (_options.Options.Contains(LogOption.LogToFile))
-            {
-                _logWriters.Add(new LogFileTask());
-            }
+            if (options.Contains(LogOption.LogToEventViewer))
+                AddLogWriter(new LogEventViewerWriter("DefaultEventViewerWriter"));
 
-            if (_options.Options.Contains(LogOption.LogToEventViewer))
-            {
-                _logWriters.Add(new LogEventViewerTask());
-            }
-
-            if (_options.Options.Contains(LogOption.LogToDatabase))
-            {
-                _logWriters.Add(new LogDatabaseTask());
-            }
+            if (options.Contains(LogOption.LogToFile))
+                AddLogWriter(new LogFileWriter("DefaultFileWriter"));
         }
 
         internal void LogMessage(LogLevel level, string message)
         {
-            if (level < _options.Verbosity)
+            if (level < _commonOptions.Verbosity)
                 return;
 
-            var logMessage = new LogMessage(level, message, _options.AppName, DateTime.Now, _type);
+            var logMessage = new LogMessage(level, message, _commonOptions.AppName, DateTime.Now, _type);
             _logQueue.TryAdd(logMessage);
         }
 
         internal void LogDeferred(LogLevel level, Func<string> msgFunc)
         {
-            if (level >= _options.Verbosity)
+            if (level >= _commonOptions.Verbosity)
                 LogMessage(level, msgFunc());
         }
 
@@ -82,7 +90,7 @@ namespace Logger
                 {
                     if (_logQueue.TryTake(out var message))
                     {
-                        foreach (var logger in _logWriters)
+                        foreach (var logger in _logWriters.Values)
                         {
                             logger.LogMessage(message);
                         }
