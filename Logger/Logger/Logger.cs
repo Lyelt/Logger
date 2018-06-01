@@ -9,32 +9,67 @@ using static Logger.Enums;
 
 namespace Logger
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class Logger
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string DefaultLogWriter { get; } = "DefaultLogWriter";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string DefaultDatabaseWriter { get; } = "DefaultDatabaseWriter";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string DefaultEventViewerWriter { get; } = "DefaultEventViewerWriter";
+
         private LogOptions _commonOptions;
-
         private Type _type;
-        private Dictionary<string, LogWriter> _logWriters;
+        private Dictionary<string, LogWriter> _logWriters = new Dictionary<string, LogWriter>();
+        private BlockingCollection<LogMessage> _logQueue = new BlockingCollection<LogMessage>();
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        private BlockingCollection<LogMessage> _logQueue;
-        private CancellationTokenSource _cts;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="commonOptions"></param>
+        /// <param name="options"></param>
         public Logger(Type t, LogOptions commonOptions, params LogOption[] options)
         {
             _commonOptions = commonOptions;
             _type = t;
-            _logQueue = new BlockingCollection<LogMessage>();
-            _cts = new CancellationTokenSource();
-            _logWriters = new Dictionary<string, LogWriter>();
+
             SetLogWriters(options);
+
+            Task.Run(() => LogMessages(), _cts.Token);
         }
 
-        public void SetOptions(string writerName, WriterOptions options)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writerName"></param>
+        /// <returns></returns>
+        public LogWriter GetLogWriter(string writerName)
         {
-
+            if (_logWriters.ContainsKey(writerName))
+                return _logWriters[writerName];
+            else
+                return null;
         }
 
-        public void SetOptions(string writerName, LogOptions options)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writerName"></param>
+        /// <param name="options"></param>
+        public void SetLogOptions(string writerName, LogOptions options)
         {
             if (_logWriters.ContainsKey(writerName))
             {
@@ -42,7 +77,11 @@ namespace Logger
             }
         }
 
-        public void SetOptions(LogOptions options)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        public void SetAllOptions(LogOptions options)
         {
             foreach (var writer in _logWriters.Values)
             {
@@ -50,21 +89,13 @@ namespace Logger
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writer"></param>
         public void AddLogWriter(LogWriter writer)
         {
             _logWriters[writer.Name] = writer;
-        }
-
-        private void SetLogWriters(params LogOption[] options)
-        {
-            if (options.Contains(LogOption.LogToDatabase))
-                AddLogWriter(new LogDatabaseWriter("DefaultDatabaseWriter"));
-
-            if (options.Contains(LogOption.LogToEventViewer))
-                AddLogWriter(new LogEventViewerWriter("DefaultEventViewerWriter"));
-
-            if (options.Contains(LogOption.LogToFile))
-                AddLogWriter(new LogFileWriter("DefaultFileWriter"));
         }
 
         internal void LogMessage(LogLevel level, string message)
@@ -80,6 +111,18 @@ namespace Logger
         {
             if (level >= _commonOptions.Verbosity)
                 LogMessage(level, msgFunc());
+        }
+
+        private void SetLogWriters(params LogOption[] options)
+        {
+            if (options.Contains(LogOption.LogToDatabase))
+                AddLogWriter(new LogDatabaseWriter(DefaultDatabaseWriter));
+
+            if (options.Contains(LogOption.LogToEventViewer))
+                AddLogWriter(new LogEventViewerWriter(DefaultEventViewerWriter));
+
+            if (options.Contains(LogOption.LogToFile))
+                AddLogWriter(new LogFileWriter(DefaultLogWriter));
         }
 
         private void LogMessages()

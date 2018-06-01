@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,9 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
-    <Compile Include="LogOptions\LogEventViewerOptions.cs" />
-    <Compile Include="LogOptions\LogDatabaseOptions.cs" />
-    <Compile Include="LogOptions\LogFileOptions.cs" />
     <Compile Include="LogLevels\Debug.cs" />
     <Compile Include="LogLevels\Error.cs" />
     <Compile Include="LogLevels\Fatal.cs" />
@@ -53,11 +51,10 @@
     <Compile Include="LogMessage.cs" />
     <Compile Include="LogManager.cs" />
     <Compile Include="LogOptions\LogOptions.cs" />
-    <Compile Include="LogOptions\WriterOptions.cs" />
-    <Compile Include="LogTasks\LogEventViewerWriter.cs" />
-    <Compile Include="LogTasks\LogDatabaseWriter.cs" />
-    <Compile Include="LogTasks\LogFileWriter.cs" />
-    <Compile Include="LogTasks\LogWriter.cs" />
+    <Compile Include="LogWriters\LogEventViewerWriter.cs" />
+    <Compile Include="LogWriters\LogDatabaseWriter.cs" />
+    <Compile Include="LogWriters\LogFileWriter.cs" />
+    <Compile Include="LogWriters\LogWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -7,18 +7,44 @@ using static Logger.Enums;
 
 namespace Logger
 {
+    /// <summary>
+    /// Represents a single log message to be logged by any log writer
+    /// </summary>
     public class LogMessage
     {
+        /// <summary>
+        /// The text content of the log message
+        /// </summary>
         public string Message { get; set; }
 
+        /// <summary>
+        /// The severity level with which this message is being logged
+        /// </summary>
         public LogLevel Level { get; set; }
 
+        /// <summary>
+        /// The name of the application logging the message
+        /// </summary>
         public string AppName { get; set; }
 
+        /// <summary>
+        /// The datetime of the log message
+        /// </summary>
         public DateTime MessageTime { get; set; }
 
+        /// <summary>
+        /// The class type from which the log message originated
+        /// </summary>
         public Type Class { get; set; }
 
+        /// <summary>
+        /// Create a log message
+        /// </summary>
+        /// <param name="level">Level of the log message</param>
+        /// <param name="message">Text of the message</param>
+        /// <param name="appName">Sending application name</param>
+        /// <param name="dt">DateTime of the message</param>
+        /// <param name="type">Sending class type</param>
         public LogMessage(LogLevel level, string message, string appName, DateTime dt, Type type)
         {
             Level = level;
@@ -28,6 +54,9 @@ namespace Logger
             Class = type;
         }
 
+        /// <summary>
+        /// Format the log message in the default way to be printed to a log writer
+        /// </summary>
         public override string ToString()
         {
             return $"[{MessageTime}] <{Level}> in {AppName}.{Class.Name}: {Message}";

@@ -26,17 +26,25 @@ namespace Logger
         /// </summary>
         public bool DuplicationFilter { get; set; }
 
-        public static LogOptions Default
+        /// <summary>
+        /// Create a new Log Options object with the given app name, verbosity, and duplication filter option.
+        /// </summary>
+        /// <remarks>
+        /// Anything not specified will get a default value.
+        /// </remarks>
+        /// <param name="appName">App name to be used in the logs. Default is the current running application's name</param>
+        /// <param name="verbosity">Minimum level of messages to log. Default Information</param>
+        /// <param name="dupFilter">Whether to filter for duplicate files. Default is false</param>
+        public LogOptions(string appName = null, LogLevel verbosity = LogLevel.Information, bool dupFilter = false)
         {
-            get
-            {
-                return new LogOptions
-                {
-                    AppName = AppDomain.CurrentDomain.FriendlyName,
-                    Verbosity = LogLevel.Information,
-                    DuplicationFilter = false
-                };
-            }
+            AppName = appName ?? AppDomain.CurrentDomain?.FriendlyName ?? string.Empty;
+            Verbosity = verbosity;
+            DuplicationFilter = dupFilter;
         }
+
+        /// <summary>
+        /// Default logger options 
+        /// </summary>
+        public static LogOptions Default { get { return new LogOptions(); } }
     }
 }

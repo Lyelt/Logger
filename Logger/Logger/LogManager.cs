@@ -10,7 +10,7 @@ using static Logger.Enums;
 namespace Logger
 {
     public static class LogManager
-    {
+    { 
         private static LogOptions _defaults;
         private static Logger _globalLogger;
 
@@ -18,13 +18,13 @@ namespace Logger
         static LogManager()
         {
             _defaults = LogOptions.Default;
-            _globalLogger = new Logger(typeof(LogManager), _defaults);
+            _globalLogger = GetLogger<Logger>();
         }
 
         public static void SetDefaults(LogOptions options)
         {
             _defaults = options;
-            _globalLogger.SetOptions(_defaults);
+            _globalLogger.SetAllOptions(_defaults);
         }
 
         /// <summary>
@@ -37,6 +37,12 @@ namespace Logger
             return GetLogger<T>(_defaults);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static Logger GetLogger<T>(params LogOption[] options)
         {
             return GetLogger<T>(_defaults, options);
