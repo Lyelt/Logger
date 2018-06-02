@@ -9,8 +9,13 @@ namespace Logger
 {
     public class LogFileWriter : LogWriter
     {
+        private static LogFileComparer LOG_COMPARER = new LogFileComparer();
+        private static string NEW_LOG = ".1.log";
         private static string LOG_EXT = ".log";
-        private string _logFileName;
+        private static string LOG_MATCH = ".*.log";
+        private string _logFile;
+        private string _logDir;
+        private string _baseLogName;
 
         /// <summary>
         /// Create a new log file writer with the specified name and the default LogOptions
@@ -49,23 +54,27 @@ namespace Logger
         /// <param name="common">Log options commmon to all writers</param>
         public LogFileWriter(string name, LogOptions common) : base(name, common)
         {
+            DirectoryInfo dirInfo;
             try
             {
-                var dirInfo = Directory.CreateDirectory(LogDirectory);
-                _logFileName = dirInfo.FullName + _commonOptions.AppName + LOG_EXT;
+                dirInfo = Directory.CreateDirectory(LogDirectory);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-                _logFileName = _commonOptions.AppName + LOG_EXT;
+                dirInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
             }
+
+            _logDir = dirInfo.FullName;
+            _baseLogName = _logDir + _commonOptions.AppName;
+            _logFile = _baseLogName + LOG_EXT;
         }
 
         public override void LogMessage(LogMessage message)
         {
             try
             {
-                File.AppendAllText(_logFileName, message.ToString());
+                File.AppendAllText(_logFile, message.ToString());
             }
             catch (Exception ex)
             {
@@ -81,7 +90,65 @@ namespace Logger
 
         private void RotateLogFiles()
         {
+            try
+            {
+                FileInfo file = new FileInfo(_logFile);
+                if (file.Length >= MaxLogFileSize * 1024 || DateTime.Now - file.LastWriteTime > MaxLogFileAge)
+                {
+                    string newPath = string.Concat(_logDir, _commonOptions.AppName, NEW_LOG);
+                    if (File.Exists(newPath))
+                    {
+                        RotateOldFiles();
+                    }
 
+                    File.Move(_logFile, newPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Error rotating log files...");
+                Console.Error.WriteLine(ex);
+            }
+        }
+
+        private void RotateOldFiles()
+        {
+            List<string> logs = Directory.GetFiles(_logDir, _baseLogName + LOG_MATCH).ToList();
+            logs.Sort(LOG_COMPARER);
+            logs.Reverse();
+
+            foreach (string log in logs)
+            {
+                int logNum = GetLogNumber(log);
+
+                if (logNum > MaxNumberLogFiles)
+                {
+                    if (CompressArchivedFiles)
+                        CompressFile(log);
+                    else
+                        File.Delete(log);
+                }
+                else
+                {
+                    File.Move(log, string.Concat(_baseLogName, ".", ++logNum, LOG_EXT));
+                }
+            }
+        }
+
+        private void CompressFile(string filePath)
+        {
+
+        }
+
+        internal static int GetLogNumber(string log)
+        {
+            string[] split = log.Split('.');
+            int logNum = 0;
+
+            if (split.Length > 2)
+                int.TryParse(split[split.Length - 2], out logNum);
+
+            return logNum;
         }
 
         #region Properties
@@ -101,6 +168,11 @@ namespace Logger
         public float MaxLogFileSize { get; set; } = 1024;
 
         /// <summary>
+        /// Maximum log file age. Default 7 days
+        /// </summary>
+        public TimeSpan MaxLogFileAge { get; set; } = TimeSpan.FromDays(7);
+
+        /// <summary>
         /// Maximum number of log files to keep. Default 100
         /// </summary>
         public int MaxNumberLogFiles { get; set; } = 100;
@@ -110,5 +182,16 @@ namespace Logger
         /// </summary>
         public bool CompressArchivedFiles { get; set; } = false;
         #endregion
+
+        private class LogFileComparer : IComparer<string>
+        {
+            public int Compare(string log1, string log2)
+            {
+                int logNum1 = GetLogNumber(log1);
+                int logNum2 = GetLogNumber(log2);
+
+                return logNum1.CompareTo(logNum2);
+            }
+        }
     }
 }

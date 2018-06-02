@@ -55,7 +55,7 @@ namespace Logger
         /// 
         /// </summary>
         /// <param name="writerName"></param>
-        /// <returns></returns>
+        /// <returns>The log writer with the given name, or null if one does not exist</returns>
         public LogWriter GetLogWriter(string writerName)
         {
             if (_logWriters.ContainsKey(writerName))
