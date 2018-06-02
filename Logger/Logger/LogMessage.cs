@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Logger.Enums;
+using static LyeltLogger.Enums;
 
-namespace Logger
+namespace LyeltLogger
 {
     /// <summary>
     /// Represents a single log message to be logged by any log writer

@@ -5,10 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Logger.Enums;
+using static LyeltLogger.Enums;
 
-namespace Logger
+namespace LyeltLogger
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class LogManager
     { 
         private static LogOptions _defaults;

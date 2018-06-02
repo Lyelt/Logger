@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Logger;
-using static Logger.Enums;
+using LyeltLogger;
+using static LyeltLogger.Enums;
 using NUnit.Framework;
 
 namespace LoggerTests
@@ -18,7 +18,8 @@ namespace LoggerTests
         [SetUp]
         public void LogTestSetup()
         {
-            
+            LogOptions options = new LogOptions(APP_NAME, LogLevel.Debug, false);
+            LogManager.SetDefaults(options);
         }
 
         [Test]

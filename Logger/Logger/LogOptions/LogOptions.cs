@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Logger.Enums;
+using static LyeltLogger.Enums;
 
-namespace Logger
+namespace LyeltLogger
 {
     public class LogOptions
     {
