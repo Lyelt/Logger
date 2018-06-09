@@ -10,25 +10,10 @@ using static LyeltLogger.Enums;
 namespace LyeltLogger
 {
     /// <summary>
-    /// 
+    /// Class representing an instance of a logger which maintains a queue of log messages written by all of the implemented log writers
     /// </summary>
     public partial class Logger
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public static string DefaultLogWriter { get; } = "DefaultLogWriter";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static string DefaultDatabaseWriter { get; } = "DefaultDatabaseWriter";
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public static string DefaultEventViewerWriter { get; } = "DefaultEventViewerWriter";
-
         private LogOptions _commonOptions;
         private Type _type;
         private Dictionary<string, LogWriter> _logWriters = new Dictionary<string, LogWriter>();
@@ -36,12 +21,12 @@ namespace LyeltLogger
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
         /// <summary>
-        /// 
+        /// Create a logger of the specified type with the given options and writer options
         /// </summary>
-        /// <param name="t"></param>
-        /// <param name="commonOptions"></param>
-        /// <param name="options"></param>
-        public Logger(Type t, LogOptions commonOptions, params LogOption[] options)
+        /// <param name="t">Logger type</param>
+        /// <param name="commonOptions">Options common to all writers</param>
+        /// <param name="options">Log writer options</param>
+        public Logger(Type t, LogOptions commonOptions, params LogWriterOption[] options)
         {
             _commonOptions = commonOptions;
             _type = t;
@@ -52,9 +37,17 @@ namespace LyeltLogger
         }
 
         /// <summary>
-        /// 
+        /// Clear all log writers from this logger
         /// </summary>
-        /// <param name="writerName"></param>
+        public void ClearWriters()
+        {
+            _logWriters.Clear();
+        }
+
+        /// <summary>
+        /// Get the log writer with the given name
+        /// </summary>
+        /// <param name="writerName">The internal, unique name of the log writer</param>
         /// <returns>The log writer with the given name, or null if one does not exist</returns>
         public LogWriter GetLogWriter(string writerName)
         {
@@ -65,10 +58,10 @@ namespace LyeltLogger
         }
 
         /// <summary>
-        /// 
+        /// Set the log options for the given log writer
         /// </summary>
-        /// <param name="writerName"></param>
-        /// <param name="options"></param>
+        /// <param name="writerName">Internal, unique name of the log writer</param>
+        /// <param name="options">LogOptions to set for the given writer</param>
         public void SetLogOptions(string writerName, LogOptions options)
         {
             if (_logWriters.ContainsKey(writerName))
@@ -78,9 +71,9 @@ namespace LyeltLogger
         }
 
         /// <summary>
-        /// 
+        /// Set options for all log writers maintained by this logger
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">LogOptions to set for all writers</param>
         public void SetAllOptions(LogOptions options)
         {
             foreach (var writer in _logWriters.Values)
@@ -90,9 +83,9 @@ namespace LyeltLogger
         }
 
         /// <summary>
-        /// 
+        /// Add the given log writer to the logger's list of maintained log writers
         /// </summary>
-        /// <param name="writer"></param>
+        /// <param name="writer">The log writer to add</param>
         public void AddLogWriter(LogWriter writer)
         {
             _logWriters[writer.Name] = writer;
@@ -113,16 +106,16 @@ namespace LyeltLogger
                 LogMessage(level, msgFunc());
         }
 
-        private void SetLogWriters(params LogOption[] options)
+        private void SetLogWriters(params LogWriterOption[] options)
         {
-            if (options.Contains(LogOption.LogToDatabase))
-                AddLogWriter(new LogDatabaseWriter(DefaultDatabaseWriter));
+            if (options.Contains(LogWriterOption.LogToDatabase))
+                AddLogWriter(new LogDatabaseWriter(DefaultDatabaseWriterName));
 
-            if (options.Contains(LogOption.LogToEventViewer))
-                AddLogWriter(new LogEventViewerWriter(DefaultEventViewerWriter));
+            if (options.Contains(LogWriterOption.LogToEventViewer))
+                AddLogWriter(new LogEventViewerWriter(DefaultEventViewerWriterName));
 
-            if (options.Contains(LogOption.LogToFile))
-                AddLogWriter(new LogFileWriter(DefaultLogWriter));
+            if (options.Contains(LogWriterOption.LogToFile))
+                AddLogWriter(new LogFileWriter(DefaultLogFileWriterName));
         }
 
         private void LogMessages()
@@ -146,5 +139,20 @@ namespace LyeltLogger
                 }
             }
         }
+
+        /// <summary>
+        /// Name of the default log file writer
+        /// </summary>
+        public static string DefaultLogFileWriterName { get; } = "DefaultLogFileWriter";
+
+        /// <summary>
+        /// Name of the default log database writer
+        /// </summary>
+        public static string DefaultDatabaseWriterName { get; } = "DefaultDatabaseWriter";
+
+        /// <summary>
+        /// Name of the default log event viewer writer
+        /// </summary>
+        public static string DefaultEventViewerWriterName { get; } = "DefaultEventViewerWriter";
     }
 }

@@ -21,7 +21,7 @@ namespace LyeltLogger
             Fatal = 5
         }
 
-        public enum LogOption
+        public enum LogWriterOption
         {
             LogToFile,
 

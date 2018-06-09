@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileLogTests.cs" />
     <Compile Include="LogTests.cs" />
     <Compile Include="StaticLogTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
