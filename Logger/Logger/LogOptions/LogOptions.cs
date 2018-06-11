@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -37,7 +38,7 @@ namespace LyeltLogger
         /// <param name="dupFilter">Whether to filter for duplicate files. Default is false</param>
         public LogOptions(string appName = null, LogLevel verbosity = LogLevel.Information, bool dupFilter = false)
         {
-            AppName = appName ?? AppDomain.CurrentDomain?.FriendlyName ?? string.Empty;
+            AppName = appName ?? Process.GetCurrentProcess()?.ProcessName ?? string.Empty;
             Verbosity = verbosity;
             DuplicationFilter = dupFilter;
         }

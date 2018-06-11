@@ -9,11 +9,11 @@ namespace LyeltLogger
 {
     public class LogFileWriter : LogWriter
     {
+        private static string DEFAULT_LOG_DIR = "logs";
         private static LogFileComparer LOG_COMPARER = new LogFileComparer();
         private static string NEW_LOG = ".1.log";
         private static string LOG_EXT = ".log";
         private static string LOG_MATCH = ".*.log";
-        private string _logFile;
         private string _logDir;
         private string _baseLogName;
 
@@ -21,7 +21,7 @@ namespace LyeltLogger
         /// Create a new log file writer with the specified name and the default LogOptions
         /// </summary>
         /// <param name="name">Internal, unique name of the LogWriter</param>
-        public LogFileWriter(string name) : this(name, LogOptions.Default) { }
+        public LogFileWriter(string name) : this(name, DEFAULT_LOG_DIR, LogOptions.Default) { }
 
         /// <summary>
         /// Create a new log file writer with the specified name and log directory
@@ -31,10 +31,14 @@ namespace LyeltLogger
         /// </remarks>
         /// <param name="name">Internal, unique name of the LogWriter</param>
         /// <param name="logDirectory">Directory to create log files in</param>
-        public LogFileWriter(string name, string logDirectory) : this(name, LogOptions.Default)
-        {
-            LogDirectory = logDirectory;
-        }
+        public LogFileWriter(string name, string logDirectory) : this(name, logDirectory, LogOptions.Default) { }
+
+        /// <summary>
+        /// Create a new log file writer with the specified name and log options
+        /// </summary>
+        /// <param name="name">Internal, unique name of the LogWriter</param>
+        /// <param name="common">Log options commmon to all writers</param>
+        public LogFileWriter(string name, LogOptions common) : this(name, DEFAULT_LOG_DIR, common) { }
 
         /// <summary>
         /// Create a new log file writer with the specified name, log directory, and log options.
@@ -42,39 +46,29 @@ namespace LyeltLogger
         /// <param name="name">Internal, unique name of the LogWriter</param>
         /// <param name="logDirectory">Directory to create log files in</param>
         /// <param name="common">Log options commmon to all writers</param>
-        public LogFileWriter(string name, string logDirectory, LogOptions common) : this(name, common)
+        public LogFileWriter(string name, string logDirectory, LogOptions common) : base(name, common)
         {
             LogDirectory = logDirectory;
+
+            DirectoryInfo dirInfo = Directory.CreateDirectory(LogDirectory);
+            _logDir = dirInfo.FullName;
+            _baseLogName = _logDir + "\\" + _commonOptions.AppName;
+            LogFile = _baseLogName + LOG_EXT;
         }
 
-        /// <summary>
-        /// Create a new log file writer with the specified name and log options
-        /// </summary>
-        /// <param name="name">Internal, unique name of the LogWriter</param>
-        /// <param name="common">Log options commmon to all writers</param>
-        public LogFileWriter(string name, LogOptions common) : base(name, common)
+        public override void SetCommonOptions(LogOptions options)
         {
-            DirectoryInfo dirInfo;
-            try
-            {
-                dirInfo = Directory.CreateDirectory(LogDirectory);
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine(ex);
-                dirInfo = new DirectoryInfo(Directory.GetCurrentDirectory());
-            }
-
-            _logDir = dirInfo.FullName;
-            _baseLogName = _logDir + _commonOptions.AppName;
-            _logFile = _baseLogName + LOG_EXT;
+            base.SetCommonOptions(options);
+            
+            _baseLogName = _logDir + "\\" + _commonOptions.AppName;
+            LogFile = _baseLogName + LOG_EXT;
         }
 
         public override void LogMessage(LogMessage message)
         {
             try
             {
-                File.AppendAllText(_logFile, message.ToString());
+                File.AppendAllText(LogFile, message.ToString());
             }
             catch (Exception ex)
             {
@@ -92,16 +86,16 @@ namespace LyeltLogger
         {
             try
             {
-                FileInfo file = new FileInfo(_logFile);
+                FileInfo file = new FileInfo(LogFile);
                 if (file.Length >= MaxLogFileSize * 1024 || DateTime.Now - file.LastWriteTime > MaxLogFileAge)
                 {
-                    string newPath = string.Concat(_logDir, _commonOptions.AppName, NEW_LOG);
+                    string newPath = _baseLogName + NEW_LOG;
                     if (File.Exists(newPath))
                     {
                         RotateOldFiles();
                     }
 
-                    File.Move(_logFile, newPath);
+                    File.Move(LogFile, newPath);
                 }
             }
             catch (Exception ex)
@@ -155,7 +149,12 @@ namespace LyeltLogger
         /// <summary>
         /// Directory to log to. Default current directory
         /// </summary>
-        public string LogDirectory { get; } = Directory.GetCurrentDirectory();
+        public string LogDirectory { get; set; } = Directory.GetCurrentDirectory();
+
+        /// <summary>
+        /// Name of the log file.
+        /// </summary>
+        public string LogFile { get; set; }
 
         /// <summary>
         /// Whether to rotate logs when the max file size is reached. Default true

@@ -49,7 +49,7 @@ namespace LyeltLogger
         {
             Level = level;
             Message = message;
-            AppName = AppName;
+            AppName = appName;
             MessageTime = dt;
             Class = type;
         }
@@ -59,7 +59,7 @@ namespace LyeltLogger
         /// </summary>
         public override string ToString()
         {
-            return $"[{MessageTime}] <{Level}> in {AppName}.{Class.Name}: {Message}";
+            return $"[{MessageTime}] <{Level}> in {AppName}.{Class.Name}: {Message}{Environment.NewLine}";
         }
     }
 }

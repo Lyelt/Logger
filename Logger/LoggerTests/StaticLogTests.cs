@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 using LyeltLogger;
 using static LyeltLogger.Enums;
 using NUnit.Framework;
+using System.IO;
 
 namespace LoggerTests
 {
     [TestFixture]
     public class StaticLogTests
     {
-        private string LOG_DIR = "..\\log\\";
-        private string APP_NAME = "TestAppName";
+        private string LOG_DIR = "testStaticLogs";
+        private string APP_NAME = "TestStaticAppName";
 
-        [SetUp]
+        [OneTimeSetUp]
         public void LogTestSetup()
         {
             LogOptions options = new LogOptions(APP_NAME, LogLevel.Debug, false);
@@ -23,36 +24,22 @@ namespace LoggerTests
         }
 
         [Test]
-        public void LogDebugTest()
+        public void LogLevelTests()
         {
             Log.Debug("test debug message");
-            DirectoryAssert.Exists(LOG_DIR);
-            FileAssert.Exists(LOG_DIR + APP_NAME + ".log");
-            
-        }
-
-        [Test]
-        public void LogInfoTest()
-        {
             Log.Information("test info message");
-        }
-
-        [Test]
-        public void LogWarnTest()
-        {
             Log.Warning("test warn message");
-        }
-
-        [Test]
-        public void LogErrorTest()
-        {
             Log.Error("test error message");
-        }
-
-        [Test]
-        public void LogFatalTest()
-        {
             Log.Fatal("test fatal message");
+
+            System.Threading.Thread.Sleep(1000);
+
+            var writer = LogManager.GetGlobalLogger().GetLogWriter(Logger.DefaultLogFileWriterName) as LogFileWriter;
+            DirectoryAssert.Exists(writer.LogDirectory);
+            FileAssert.Exists(writer.LogFile);
+            var lines = File.ReadAllLines(writer.LogFile);
+
+            Assert.That(lines.Count() > 0);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using LyeltLogger;
 using static LyeltLogger.Enums;
+using System.IO;
 
 namespace LoggerTests
 {
@@ -13,14 +14,23 @@ namespace LoggerTests
     public class FileLogTests
     {
         private const string WRITER_NAME = "Log File Writer";
+        private const string APP_NAME = "LogTestAppName";
+
+        private const string TEST_DEBUG = "test debug message";
+        private const string TEST_INFO = "test info message";
+        private const string TEST_WARN = "test warn message";
+        private const string TEST_ERROR = "test error message";
+        private const string TEST_FATAL = "test fatal message";
+
         private Logger _log;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            LogOptions opts = new LogOptions("Log Test App", LogLevel.Debug, true);
+            Directory.SetCurrentDirectory("C:\\Workspace\\Logger\\");
+            LogOptions opts = new LogOptions(APP_NAME, LogLevel.Debug, true);
             _log = LogManager.GetLogger<FileLogTests>(opts);
-            var writer = new LogFileWriter(WRITER_NAME, "..\\testLogs\\");
+            var writer = new LogFileWriter(WRITER_NAME, "testLogFiles", opts);
             writer.CompressArchivedFiles = false;
             writer.MaxLogFileSize = 50;
             writer.RotateLogs = true;
@@ -28,40 +38,51 @@ namespace LoggerTests
         }
 
         [Test]
-        public void TestDebug()
+        public void TestLogWriterAdded()
         {
-            _log.Debug("test debug message");
+            if (_log.GetLogWriter(WRITER_NAME) is LogFileWriter writer)
+            {
+                DirectoryAssert.Exists(writer.LogDirectory);
+            }
+            else
+            {
+                Assert.Fail($"LogWriter {WRITER_NAME} is not a LogFileWriter type.");
+            }
         }
 
         [Test]
-        public void TestInfo()
+        public void TestLogWriter()
         {
-            _log.Information("test info message");
-        }
-
-        [Test]
-        public void TestWarn()
-        {
-            _log.Warning("test warning message");
-        }
-
-        [Test]
-        public void TestError()
-        {
-            _log.Error("test exception message");
-        }
-
-        [Test]
-        public void TestFatal()
-        {
-            _log.Fatal("test fatal message");
-        }
-
-        private void AssertLogGenerics()
-        {
-            Assert.That(_log.GetLogWriter(WRITER_NAME) is LogFileWriter);
             var writer = _log.GetLogWriter(WRITER_NAME) as LogFileWriter;
-            DirectoryAssert.Exists(writer.LogDirectory);
+
+            _log.Debug(TEST_DEBUG);
+            _log.Information(TEST_INFO);
+            _log.Warning(TEST_WARN);
+            _log.Error(TEST_ERROR);
+            _log.Fatal(TEST_FATAL);
+
+            System.Threading.Thread.Sleep(1000);
+
+            FileAssert.Exists(writer.LogFile);
+
+            List<string> logFileLines = File.ReadAllLines(writer.LogFile).ToList();
+
+            // All 5 lines were logged
+            Assert.That(logFileLines.Count >= 5);
+
+            // All 5 messages were properly logged
+            Assert.That(logFileLines.Any(line => line.Contains(TEST_DEBUG)));
+            Assert.That(logFileLines.Any(line => line.Contains(TEST_INFO)));
+            Assert.That(logFileLines.Any(line => line.Contains(TEST_WARN)));
+            Assert.That(logFileLines.Any(line => line.Contains(TEST_ERROR)));
+            Assert.That(logFileLines.Any(line => line.Contains(TEST_FATAL)));
+
+            // All 5 log levels are properly represented
+            Assert.That(logFileLines.Any(line => line.Contains("<" + "Debug" + ">")));
+            Assert.That(logFileLines.Any(line => line.Contains("<" + "Information" + ">")));
+            Assert.That(logFileLines.Any(line => line.Contains("<" + "Warning" + ">")));
+            Assert.That(logFileLines.Any(line => line.Contains("<" + "Error" + ">")));
+            Assert.That(logFileLines.Any(line => line.Contains("<" + "Fatal" + ">")));
         }
     }
 }

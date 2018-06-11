@@ -30,7 +30,7 @@ namespace LyeltLogger
         /// Set the options for this log writer which are common to all log writers
         /// </summary>
         /// <param name="options">Log options to set</param>
-        public void SetCommonOptions(LogOptions options)
+        public virtual void SetCommonOptions(LogOptions options)
         {
             _commonOptions = options;
         }
