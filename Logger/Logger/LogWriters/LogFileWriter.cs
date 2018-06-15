@@ -9,6 +9,7 @@ namespace LyeltLogger
 {
     public class LogFileWriter : LogWriter
     {
+
         private static string DEFAULT_LOG_DIR = "logs";
         private static LogFileComparer LOG_COMPARER = new LogFileComparer();
         private static string NEW_LOG = ".1.log";
@@ -16,6 +17,17 @@ namespace LyeltLogger
         private static string LOG_MATCH = ".*.log";
         private string _logDir;
         private string _baseLogName;
+
+        /// <summary>
+        /// The default log file writer. Uses default name, directory, and log options.
+        /// </summary>
+        public static LogFileWriter Default
+        {
+            get
+            {
+                return new LogFileWriter(Logger.DefaultLogFileWriterName);
+            }
+        }
 
         /// <summary>
         /// Create a new log file writer with the specified name and the default LogOptions
@@ -56,6 +68,10 @@ namespace LyeltLogger
             LogFile = _baseLogName + LOG_EXT;
         }
 
+        /// <summary>
+        /// Set the common options for this writer as well as the default options for the logger
+        /// </summary>
+        /// <param name="options">Common log options</param>
         public override void SetCommonOptions(LogOptions options)
         {
             base.SetCommonOptions(options);
@@ -107,7 +123,8 @@ namespace LyeltLogger
 
         private void RotateOldFiles()
         {
-            List<string> logs = Directory.GetFiles(_logDir, _baseLogName + LOG_MATCH).ToList();
+            string path = Path.GetDirectoryName(LogFile);
+            List<string> logs = Directory.GetFiles(path, _commonOptions.AppName + LOG_MATCH).ToList();
             logs.Sort(LOG_COMPARER);
             logs.Reverse();
 
@@ -182,6 +199,7 @@ namespace LyeltLogger
         public bool CompressArchivedFiles { get; set; } = false;
         #endregion
 
+        // Compare two log files based on their log number
         private class LogFileComparer : IComparer<string>
         {
             public int Compare(string log1, string log2)

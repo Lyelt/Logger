@@ -26,13 +26,11 @@ namespace LyeltLogger
         /// <param name="t">Logger type</param>
         /// <param name="commonOptions">Options common to all writers</param>
         /// <param name="options">Log writer options</param>
-        public Logger(Type t, LogOptions commonOptions, params LogWriterOption[] options)
+        public Logger(Type t, LogOptions commonOptions)
         {
             _commonOptions = commonOptions;
             _type = t;
-
-            SetLogWriters(options);
-
+            
             Task.Run(() => LogMessages(), _cts.Token);
         }
 
@@ -97,25 +95,24 @@ namespace LyeltLogger
                 return;
 
             var logMessage = new LogMessage(level, message, _commonOptions.AppName, DateTime.Now, _type);
-            _logQueue.TryAdd(logMessage);
+
+            if (_commonOptions.SynchronousLogging)
+            {
+                foreach (var writer in _logWriters.Values)
+                {
+                    writer.LogMessage(logMessage);
+                }
+            }
+            else
+            {
+                _logQueue.TryAdd(logMessage);
+            }
         }
 
         internal void LogDeferred(LogLevel level, Func<string> msgFunc)
         {
             if (level >= _commonOptions.Verbosity)
                 LogMessage(level, msgFunc());
-        }
-
-        private void SetLogWriters(params LogWriterOption[] options)
-        {
-            if (options.Contains(LogWriterOption.LogToDatabase))
-                AddLogWriter(new LogDatabaseWriter(DefaultDatabaseWriterName));
-
-            if (options.Contains(LogWriterOption.LogToEventViewer))
-                AddLogWriter(new LogEventViewerWriter(DefaultEventViewerWriterName));
-
-            if (options.Contains(LogWriterOption.LogToFile))
-                AddLogWriter(new LogFileWriter(DefaultLogFileWriterName));
         }
 
         private void LogMessages()
@@ -140,19 +137,9 @@ namespace LyeltLogger
             }
         }
 
-        /// <summary>
-        /// Name of the default log file writer
-        /// </summary>
-        public static string DefaultLogFileWriterName { get; } = "DefaultLogFileWriter";
-
-        /// <summary>
-        /// Name of the default log database writer
-        /// </summary>
-        public static string DefaultDatabaseWriterName { get; } = "DefaultDatabaseWriter";
-
-        /// <summary>
-        /// Name of the default log event viewer writer
-        /// </summary>
-        public static string DefaultEventViewerWriterName { get; } = "DefaultEventViewerWriter";
+        public static string DefaultLogFileWriterName
+        {
+            get { return "DefaultLogFileWriter"; }
+        }
     }
 }

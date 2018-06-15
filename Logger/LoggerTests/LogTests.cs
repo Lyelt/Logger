@@ -17,15 +17,7 @@ namespace LoggerTests
         [OneTimeSetUp]
         public void LogSetup()
         {
-            _log = LogManager.GetLogger<LogTests>(LogWriterOption.LogToFile, LogWriterOption.LogToEventViewer);
-        }
-        
-
-        [Test]
-        public void AddCustomLogWriter()
-        {
-            Logger log = LogManager.GetLogger<LogTests>(LogWriterOption.LogToDatabase);
-            log.AddLogWriter(new LogFileWriter("TestCustomFileWriter"));
+            _log = LogManager.GetLogger<LogTests>();
         }
     }
 }

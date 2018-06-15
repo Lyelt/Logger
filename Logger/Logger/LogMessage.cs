@@ -12,6 +12,7 @@ namespace LyeltLogger
     /// </summary>
     public class LogMessage
     {
+        private const string DATE_FORMAT = @"yyyy-MM-dd hh:mm:ss.ffff";
         /// <summary>
         /// The text content of the log message
         /// </summary>
@@ -59,7 +60,7 @@ namespace LyeltLogger
         /// </summary>
         public override string ToString()
         {
-            return $"[{MessageTime}] <{Level}> in {AppName}.{Class.Name}: {Message}{Environment.NewLine}";
+            return $"[{MessageTime.ToString(DATE_FORMAT)}] <{Level}> in {AppName}.{Class.Name}: {Message}{Environment.NewLine}";
         }
     }
 }

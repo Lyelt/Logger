@@ -13,7 +13,6 @@ namespace LoggerTests
     [TestFixture]
     public class StaticLogTests
     {
-        private string LOG_DIR = "testStaticLogs";
         private string APP_NAME = "TestStaticAppName";
 
         [OneTimeSetUp]

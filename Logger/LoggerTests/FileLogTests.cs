@@ -28,7 +28,7 @@ namespace LoggerTests
         public void Setup()
         {
             Directory.SetCurrentDirectory("C:\\Workspace\\Logger\\");
-            LogOptions opts = new LogOptions(APP_NAME, LogLevel.Debug, true);
+            LogOptions opts = new LogOptions(APP_NAME, LogLevel.Debug, true, true);
             _log = LogManager.GetLogger<FileLogTests>(opts);
             var writer = new LogFileWriter(WRITER_NAME, "testLogFiles", opts);
             writer.CompressArchivedFiles = false;
@@ -83,6 +83,15 @@ namespace LoggerTests
             Assert.That(logFileLines.Any(line => line.Contains("<" + "Warning" + ">")));
             Assert.That(logFileLines.Any(line => line.Contains("<" + "Error" + ">")));
             Assert.That(logFileLines.Any(line => line.Contains("<" + "Fatal" + ">")));
+        }
+
+        [Test]
+        public void TestLogRotate()
+        {
+            for (int i = 0; i < 10000; ++i)
+            {
+                _log.Information($"{i} trying to fill the log files so logging this long message");
+            }
         }
     }
 }

@@ -20,14 +20,5 @@ namespace LyeltLogger
 
             Fatal = 5
         }
-
-        public enum LogWriterOption
-        {
-            LogToFile,
-
-            LogToDatabase,
-
-            LogToEventViewer
-        }
     }
 }

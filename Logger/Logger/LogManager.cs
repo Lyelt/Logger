@@ -21,7 +21,8 @@ namespace LyeltLogger
         static LogManager()
         {
             _defaults = LogOptions.Default;
-            _globalLogger = GetLogger<Logger>(_defaults, LogWriterOption.LogToFile);
+            _globalLogger = GetLogger<Logger>(_defaults);
+            _globalLogger.AddLogWriter(LogFileWriter.Default);
         }
 
         /// <summary>
@@ -54,26 +55,15 @@ namespace LyeltLogger
         }
 
         /// <summary>
-        /// Get a logger for the given type with the provided log writer options
-        /// </summary>
-        /// <typeparam name="T">The type of the class this logger is for</typeparam>
-        /// <param name="options">Log options detailing the types of log writers to include</param>
-        /// <returns>Logger for the given class with the specified writers</returns>
-        public static Logger GetLogger<T>(params LogWriterOption[] options)
-        {
-            return GetLogger<T>(_defaults, options);
-        }
-
-        /// <summary>
         /// Get a logger for the given type
         /// </summary>
         /// <typeparam name="T">The type of the class this logger is for</typeparam>
         /// <param name="commonOptions">The options common to all log writers</param>
         /// <param name="options">Log options detailing the types of log writers to include. Default is just LogFileWriter</param>
         /// <returns>Logger for the given class with the specified writers and options</returns>
-        public static Logger GetLogger<T>(LogOptions commonOptions, params LogWriterOption[] options)
+        public static Logger GetLogger<T>(LogOptions commonOptions)
         {
-            return new Logger(typeof(T), commonOptions, options);
+            return new Logger(typeof(T), commonOptions);
         }
 
         internal static void LogDeferred(LogLevel level, Func<string> deferred)
